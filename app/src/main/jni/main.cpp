@@ -75,31 +75,31 @@ void *hack_thread(void *) {
        
     // public sealed class Camera
     // public static Camera get_main()  
-    get_current = (void *(*)())getAbsoluteAddress("libil2cpp.so", 0x203D448);
+    get_current = (void *(*)())getAbsoluteAddress("libil2cpp.so", 0x20677B0);
     
     // public class Component
     // public Transform get_transform()
-    get_transform = (void *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x2067D04);
+    get_transform = (void *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x209231C);
     
     // public class Transform
     // public Vector3 get_position() { }
-    get_position = (Vector3 (*)(void *))getAbsoluteAddress("libil2cpp.so", 0x2075B40);
+    get_position = (Vector3 (*)(void *))getAbsoluteAddress("libil2cpp.so", 0x20A0258);
     
     // public sealed class Camera
     // public Vector3 WorldToScreenPoint(Vector3 position) { }
-    worldtoscreen = (Vector3 (*)(void *, Vector3))getAbsoluteAddress("libil2cpp.so", 0x203D154);
+    worldtoscreen = (Vector3 (*)(void *, Vector3))getAbsoluteAddress("libil2cpp.so", 0x20674BC);
     
     // public class Object
     // private static bool IsNativeObjectAlive
-    isAlive = (bool *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x206F134);
+    isAlive = (bool *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x209986C);
     
     // public class NpcControl
     // private void Update() { }
-    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x998198), (void *)&_update, (void **)&old_update); // Accoring to your game . Hope You Find this offset 😁
+    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9B0DB8), (void *)&_update, (void **)&old_update); // Accoring to your game . Hope You Find this offset 😁
     
     // public class PlayerControl
     // private void Update() { }
-    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9B5530), (void *)&_myPlayer, (void **)&old_myPlayer); // Accoring to your game . Hope You Find this offset 😁
+    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9CE150), (void *)&_myPlayer, (void **)&old_myPlayer); // Accoring to your game . Hope You Find this offset 😁
 
     
     return NULL;
