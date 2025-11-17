@@ -1,6 +1,6 @@
 # Aimbot-ESP-Polyfield
 [![ESPModMenu Build](https://github.com/FlutterGenerator/Aimbot-Esp-Polyfield/actions/workflows/build-apk.yml/badge.svg)](https://github.com/FlutterGenerator/Aimbot-Esp-Polyfield/actions/workflows/build-apk.yml)
-# Polyfield Version:0.7.2
+# Polyfield Version:0.7.2 Google Play Date 8.October.2025
 ![](img.jpg)
 ![](img2.jpg)
 ## Download
