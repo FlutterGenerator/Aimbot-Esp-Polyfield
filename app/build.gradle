@@ -3,12 +3,12 @@ id 'com.android.application'
 }
 
 android {
-compileSdk 31
+compileSdk 30
 
 defaultConfig {
         applicationId "com.android.support"
         minSdk 21
-		targetSdk 31
+		targetSdk 30
 		versionCode 1
 		versionName "2.8"
         ndk {
