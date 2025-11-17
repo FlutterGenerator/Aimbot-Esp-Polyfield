@@ -1,0 +1,40 @@
+plugins {
+id 'com.android.application'
+}
+
+android {
+compileSdk 31
+
+defaultConfig {
+        applicationId "com.android.support"
+        minSdk 21
+		targetSdk 31
+		versionCode 1
+		versionName "2.8"
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+        signingConfig signingConfigs.debug
+    }
+    buildTypes {
+	release {
+	minifyEnabled false
+	proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+	}
+	}
+    compileOptions {
+	sourceCompatibility JavaVersion.VERSION_1_8
+	targetCompatibility JavaVersion.VERSION_1_8
+	}
+	externalNativeBuild {
+	ndkBuild {
+	path file('src/main/jni/Android.mk')
+	}
+}
+
+}
+
+//dependencies must be placed below 'android' brackets to get it work on AIDE
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
