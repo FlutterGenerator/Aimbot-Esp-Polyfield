@@ -58,8 +58,8 @@ void _myPlayer(void *player) {
           float xx = angles.pitch;
           float yy = angles.yaw;
           // Find this Filed Name "_lookDir" In your dump.cs
-          //public Vector2 _lookDir; // 0xA0      
-          *(Vector2 *)((uintptr_t) player + 0xA0) = Vector2(xx, yy);
+          //public Vector2 _lookDir; // 0xA8      
+          *(Vector2 *)((uintptr_t) player + 0xA8) = Vector2(xx, yy);
           }
           } else {
             players.clear();
