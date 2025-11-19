@@ -1,76 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/linear1"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#AA000000"
-    android:orientation="vertical" >
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10.0dip"
-        android:background="@drawable/round_corners_black"
-        android:gravity="center_vertical"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="12.0dip"
-            android:layout_weight="1.0"
-android:label="@string/app_name"
-            android:textColor="#FFFFFFFF"
-            android:textSize="18.0sp"
-            android:textStyle="bold"
-            android:typeface="serif" />
-
-        <ImageView
-            android:id="@+id/img_yttutorial"
-            android:layout_width="30.0dip"
-            android:layout_height="30.0dip"
-            android:layout_marginEnd="20.0dip"
-            android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/icon_yttutorial" />
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <include
-                android:id="@+id/layout1"
-                layout="@layout/main_layout" />
-
-            <include
-                android:id="@+id/layout2"
-                layout="@layout/main_layout" />
-
-            <include
-                android:id="@+id/layout3"
-                layout="@layout/main_layout" />
-
-            <include
-                android:id="@+id/layout4"
-                layout="@layout/main_layout" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10.0dip"
-                android:layout_marginRight="10.0dip"
-                android:shadowColor="#FF000000"
-                android:shadowRadius="7.0"
-                android:text="This App is designed for real-time offset hooking/patching for il2cpp and other native android Games. Join &quot;PuruliaCheatz&quot; telegram channel for more info about this App."
-                android:textColor="#FFFFFFFF"
-                android:typeface="serif" />
-        </LinearLayout>
-    </ScrollView>
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
 
 </LinearLayout>
