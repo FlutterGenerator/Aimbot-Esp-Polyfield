@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="12.0dip"
             android:layout_weight="1.0"
-            android:text="LGL Mod Menu v3.2"
+android:label="@string/app_name"
             android:textColor="#FFFFFFFF"
             android:textSize="18.0sp"
             android:textStyle="bold"
