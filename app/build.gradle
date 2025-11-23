@@ -4,7 +4,7 @@ id 'com.android.application'
 
 android {
 compileSdk 30
-namespace "com.android.support"
+namespace = "com.android.support"
 
 defaultConfig {
         applicationId "com.android.support"
