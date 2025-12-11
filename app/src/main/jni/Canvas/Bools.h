@@ -21,7 +21,6 @@ struct Angles {
 
 bool *(*isAlive)(void *);
 
-
 Angles CalculateViewAngle(const Vector3& myPlayer, const Vector3& target) {
   
     Angles viewangl;
