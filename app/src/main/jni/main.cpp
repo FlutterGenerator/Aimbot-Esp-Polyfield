@@ -21,13 +21,11 @@
 
 ESP espOverlay;
 
-
-
 void DrawESP(ESP esp, int screenWidth, int screenHeight) {
    
     screenW = screenWidth;
     screenH = screenHeight;
-    
+   
     esp.DrawFilledCircle(Color(255,255,255,255), Vector2(screenWidth / 2, screenHeight / 9), 48.0f);
     std::string count;
     count += std::to_string(players.size());
@@ -54,8 +52,7 @@ void DrawESP(ESP esp, int screenWidth, int screenHeight) {
                      if (EspLine) {
                          esp.DrawLine(Color(255,255,255,255), 1.0f, From, To);
                      }
-                     
-                     
+                       
                  } else {
                      players.clear();
                      clearPlayers();
@@ -66,8 +63,6 @@ void DrawESP(ESP esp, int screenWidth, int screenHeight) {
  
 }
 
-
-
 void *hack_thread(void *) {
     do {
         sleep(1);
@@ -75,37 +70,34 @@ void *hack_thread(void *) {
        
     // public sealed class Camera
     // public static Camera get_main()  
-    get_current = (void *(*)())getAbsoluteAddress("libil2cpp.so", 0x20677B0);
+    get_current = (void *(*)())getAbsoluteAddress("libil2cpp.so", 0x2072AB0);
     
     // public class Component
     // public Transform get_transform()
-    get_transform = (void *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x209231C);
+    get_transform = (void *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x209D61C);
     
     // public class Transform
     // public Vector3 get_position() { }
-    get_position = (Vector3 (*)(void *))getAbsoluteAddress("libil2cpp.so", 0x20A0258);
+    get_position = (Vector3 (*)(void *))getAbsoluteAddress("libil2cpp.so", 0x20AB558);
     
     // public sealed class Camera
     // public Vector3 WorldToScreenPoint(Vector3 position) { }
-    worldtoscreen = (Vector3 (*)(void *, Vector3))getAbsoluteAddress("libil2cpp.so", 0x20674BC);
+    worldtoscreen = (Vector3 (*)(void *, Vector3))getAbsoluteAddress("libil2cpp.so", 0x20727BC);
     
     // public class Object
     // private static bool IsNativeObjectAlive
-    isAlive = (bool *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x209986C);
+    isAlive = (bool *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x20A4B6C);
     
     // public class NpcControl
     // private void Update() { }
-    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9B0DB8), (void *)&_update, (void **)&old_update); // Accoring to your game . Hope You Find this offset 😁
+    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9B4D88), (void *)&_update, (void **)&old_update); // Accoring to your game . Hope You Find this offset 😁
     
     // public class PlayerControl
     // private void Update() { }
-    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9CE150), (void *)&_myPlayer, (void **)&old_myPlayer); // Accoring to your game . Hope You Find this offset 😁
+    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9D2120), (void *)&_myPlayer, (void **)&old_myPlayer); // Accoring to your game . Hope You Find this offset 😁
 
-    
     return NULL;
 }
-
-
 
 jobjectArray GetFeatureList(JNIEnv *env, jobject context) {
     jobjectArray ret;
@@ -117,8 +109,7 @@ jobjectArray GetFeatureList(JNIEnv *env, jobject context) {
             OBFUSCATE("Category_Aimbot"),
             OBFUSCATE("2_Toggle_Aimbot"),
             OBFUSCATE("3_SeekBar_Fov_0_1000"),
-            
-            
+   
     };
 
     int Total_Feature = (sizeof features / sizeof features[0]);
@@ -136,13 +127,12 @@ void Changes(JNIEnv *env, jclass clazz, jobject obj,
                                         jint featNum, jstring featName, jint value,
                                         jboolean boolean, jstring str) {
     switch (featNum) {
-   
+       
         case 0: Esp = boolean; break;
         case 1: EspLine = boolean; break;
         case 2: aimbot = boolean; break;
         case 3: fov = value; break;
-        
-        
+       
     }
 }
 
