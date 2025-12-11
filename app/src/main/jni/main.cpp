@@ -52,6 +52,19 @@ void DrawESP(ESP esp, int screenWidth, int screenHeight) {
                      if (EspLine) {
                          esp.DrawLine(Color(255,255,255,255), 1.0f, From, To);
                      }
+
+if (EspBox) {
+    float boxHeight = 200.0f;   // высота бокса (настрой себе)
+    float boxWidth  = 80.0f;    // ширина бокса
+
+    Rect rect;
+    rect.x = Pos2d.x - boxWidth / 2;
+    rect.y = screenHeight - Pos2d.y - boxHeight;
+    rect.width = boxWidth;
+    rect.height = boxHeight;
+
+    esp.DrawBox(Color(255,255,255,255), 2.0f, rect);
+}
                        
                  } else {
                      players.clear();
@@ -109,7 +122,7 @@ jobjectArray GetFeatureList(JNIEnv *env, jobject context) {
             OBFUSCATE("Category_Aimbot"),
             OBFUSCATE("2_Toggle_Aimbot"),
             OBFUSCATE("3_SeekBar_Fov_0_1000"),
-   
+            OBFUSCATE("4_Toggle_EspBox"),
     };
 
     int Total_Feature = (sizeof features / sizeof features[0]);
@@ -132,6 +145,7 @@ void Changes(JNIEnv *env, jclass clazz, jobject obj,
         case 1: EspLine = boolean; break;
         case 2: aimbot = boolean; break;
         case 3: fov = value; break;
+        case 4: EspBox = boolean; break;
        
     }
 }
