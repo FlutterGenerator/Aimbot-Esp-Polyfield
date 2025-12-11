@@ -66,15 +66,6 @@ if (EspBox) {
     esp.DrawBox(Color(255,255,255,255), 2.0f, rect);
 }
 
-std::string playerName = GetPlayerName(Player);
-    esp.DrawName(Color(255, 255, 255, 255), 3.0f, playerName,
-                 Vector3(Pos2d.x, screenHeight - Pos2d.y - boxHeight - 20, 0), 20.0f);
-
-    // Здоровье
-    float health = GetPlayerHealth(Player);
-    esp.DrawHorizontalHealthBar(Vector2(Pos2d.x, screenHeight - Pos2d.y), 60.0f, 100.0f, health);
-}
-                       
                  } else {
                      players.clear();
                      clearPlayers();
