@@ -1,4 +1,3 @@
-
 #include <jni.h>
 #include <string>
 #include <cstdlib>
@@ -12,7 +11,6 @@ int screenW = 0;
 bool Esp = false;
 bool EspLine = false;
 bool EspBox = false;
-
 
 bool aimbot;
 float fov = 1.0f;
@@ -54,9 +52,3 @@ Angles CalculateViewAngle(const Vector3& myPlayer, const Vector3& target) {
     
     return viewangl;
 }
-
-
-
-          
-
-
