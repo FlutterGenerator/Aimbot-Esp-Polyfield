@@ -1,6 +1,8 @@
 # Aimbot-ESP-Polyfield
 [![ESPModMenu Build](https://github.com/FlutterGenerator/Aimbot-Esp-Polyfield/actions/workflows/build-apk.yml/badge.svg)](https://github.com/FlutterGenerator/Aimbot-Esp-Polyfield/actions/workflows/build-apk.yml)
 
+[![License Info](https://img.shields.io/badge/License-GPL--3.0-blue.svg?style=flat-square)](https://github.com/FlutterGenerator/Aimbot-Esp-Polyfield/blob/master/LICENSE)
+
 # Polyfield Version: (21) – 0.7.3
 **Google Play Release Date:** 8 December 2025
 
