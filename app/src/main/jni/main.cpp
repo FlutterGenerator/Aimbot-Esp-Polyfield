@@ -14,7 +14,7 @@
 #include "Includes/Utils.h"
 
 #include "Menu/Register.h"
-#include "hooks.h"
+#include "Hooks.h"
 
 #include <Substrate/SubstrateHook.h>
 #include <Substrate/CydiaSubstrate.h>
