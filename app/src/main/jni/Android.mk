@@ -19,7 +19,7 @@ LOCAL_ARM_MODE := arm
 LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)
 
 # Here you add the cpp file
-LOCAL_SRC_FILES := main.cpp \
+LOCAL_SRC_FILES := Main.cpp \
     Substrate/hde64.c \
 	Substrate/SubstrateDebug.cpp \
 	Substrate/SubstrateHook.cpp \
