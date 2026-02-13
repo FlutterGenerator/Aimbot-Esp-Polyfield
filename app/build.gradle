@@ -3,13 +3,13 @@ id 'com.android.application'
 }
 
 android {
-compileSdk 30
+compileSdk 34
 namespace = "com.android.support"
 
 defaultConfig {
         applicationId "com.android.support"
         minSdk 21
-		targetSdk 30
+		targetSdk 34
 		versionCode 1
 		versionName "2.8"
         ndk {
