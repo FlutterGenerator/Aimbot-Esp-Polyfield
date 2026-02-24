@@ -3,8 +3,8 @@
 
 [![License Info](https://img.shields.io/badge/License-GPL--3.0-blue.svg?style=flat-square)](https://github.com/FlutterGenerator/Aimbot-Esp-Polyfield/blob/master/LICENSE)
 
-# Polyfield Version: (21) – 0.7.3
-**Google Play Release Date:** 8 December 2025
+# Polyfield Version: (22) – 0.7.3
+**Google Play Release Date:** 21 February 2026
 
 ![](img.jpg)
 ![](img2.jpg)
