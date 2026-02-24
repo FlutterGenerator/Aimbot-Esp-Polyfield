@@ -15,6 +15,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		/*Thread.setDefaultUncaughtExceptionHandler(
 		 new Thread.UncaughtExceptionHandler() {
 		 @Override

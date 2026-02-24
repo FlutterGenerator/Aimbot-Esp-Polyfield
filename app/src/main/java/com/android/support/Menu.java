@@ -3,7 +3,6 @@ package com.android.support;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,7 +24,6 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.method.DigitsKeyListener;
 import android.util.Base64;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -61,8 +59,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
-
-import org.xml.sax.ErrorHandler;
 
 public class Menu {
 
@@ -115,12 +111,13 @@ public class Menu {
 
 	private ESPView overlayView;
 
+	@SuppressLint("WrongConstant")
 	private void DrawCanvas(Context context) {
 		mWindowManager = ((Activity) context).getWindowManager();
 		int aditionalFlags = 0;
-		if (Build.VERSION.SDK_INT >= 11)
+		if (Build.VERSION.SDK_INT >= 24)
 			aditionalFlags = WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
-		if (Build.VERSION.SDK_INT >= 3)
+		if (Build.VERSION.SDK_INT >= 24)
 			aditionalFlags = aditionalFlags | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 		espParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
 				WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_APPLICATION,
@@ -128,7 +125,7 @@ public class Menu {
 						| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | aditionalFlags,
 				PixelFormat.TRANSPARENT);
 		espParams.format = -3;
-		espParams.gravity = 17;
+		espParams.gravity = Gravity.CENTER;
 		espParams.flags = 24;
 		espParams.width = -1;
 		espParams.height = -1;
@@ -363,42 +360,42 @@ public class Menu {
 
 			public boolean onTouch(View view, MotionEvent motionEvent) {
 				switch (motionEvent.getAction()) {
-				case MotionEvent.ACTION_DOWN:
-					initialX = vmParams.x;
-					initialY = vmParams.y;
-					initialTouchX = motionEvent.getRawX();
-					initialTouchY = motionEvent.getRawY();
-					return true;
-				case MotionEvent.ACTION_UP:
-					int rawX = (int) (motionEvent.getRawX() - initialTouchX);
-					int rawY = (int) (motionEvent.getRawY() - initialTouchY);
-					mExpanded.setAlpha(1f);
-					mCollapsed.setAlpha(1f);
-					//The check for Xdiff <10 && YDiff< 10 because sometime elements moves a little while clicking.
-					//So that is click event.
-					if (rawX < 10 && rawY < 10 && isViewCollapsed()) {
-						//When user clicks on the image view of the collapsed layout,
-						//visibility of the collapsed layout will be changed to "View.GONE"
-						//and expanded view will become visible.
-						try {
-							collapsedView.setVisibility(View.GONE);
-							expandedView.setVisibility(View.VISIBLE);
-						} catch (NullPointerException e) {
+					case MotionEvent.ACTION_DOWN:
+						initialX = vmParams.x;
+						initialY = vmParams.y;
+						initialTouchX = motionEvent.getRawX();
+						initialTouchY = motionEvent.getRawY();
+						return true;
+					case MotionEvent.ACTION_UP:
+						int rawX = (int) (motionEvent.getRawX() - initialTouchX);
+						int rawY = (int) (motionEvent.getRawY() - initialTouchY);
+						mExpanded.setAlpha(1f);
+						mCollapsed.setAlpha(1f);
+						//The check for Xdiff <10 && YDiff< 10 because sometime elements moves a little while clicking.
+						//So that is click event.
+						if (rawX < 10 && rawY < 10 && isViewCollapsed()) {
+							//When user clicks on the image view of the collapsed layout,
+							//visibility of the collapsed layout will be changed to "View.GONE"
+							//and expanded view will become visible.
+							try {
+								collapsedView.setVisibility(View.GONE);
+								expandedView.setVisibility(View.VISIBLE);
+							} catch (NullPointerException e) {
 
+							}
 						}
-					}
-					return true;
-				case MotionEvent.ACTION_MOVE:
-					mExpanded.setAlpha(0.5f);
-					mCollapsed.setAlpha(0.5f);
-					//Calculate the X and Y coordinates of the view.
-					vmParams.x = initialX + ((int) (motionEvent.getRawX() - initialTouchX));
-					vmParams.y = initialY + ((int) (motionEvent.getRawY() - initialTouchY));
-					//Update the layout with new X & Y coordinate
-					mWindowManager.updateViewLayout(rootFrame, vmParams);
-					return true;
-				default:
-					return false;
+						return true;
+					case MotionEvent.ACTION_MOVE:
+						mExpanded.setAlpha(0.5f);
+						mCollapsed.setAlpha(0.5f);
+						//Calculate the X and Y coordinates of the view.
+						vmParams.x = initialX + ((int) (motionEvent.getRawX() - initialTouchX));
+						vmParams.y = initialY + ((int) (motionEvent.getRawY() - initialTouchY));
+						//Update the layout with new X & Y coordinate
+						mWindowManager.updateViewLayout(rootFrame, vmParams);
+						return true;
+					default:
+						return false;
 				}
 			}
 		};
@@ -437,58 +434,58 @@ public class Menu {
 			}
 			String[] strSplit = feature.split("_");
 			switch (strSplit[0]) {
-			case "Toggle":
-				Switch(linearLayout, featNum, strSplit[1], switchedOn);
-				break;
-			case "SeekBar":
-				SeekBar(linearLayout, featNum, strSplit[1], Integer.parseInt(strSplit[2]),
-						Integer.parseInt(strSplit[3]));
-				break;
-			case "Button":
-				Button(linearLayout, featNum, strSplit[1]);
-				break;
-			case "ButtonOnOff":
-				ButtonOnOff(linearLayout, featNum, strSplit[1], switchedOn);
-				break;
-			case "Spinner":
-				TextView(linearLayout, strSplit[1]);
-				Spinner(linearLayout, featNum, strSplit[1], strSplit[2]);
-				break;
-			case "InputText":
-				InputText(linearLayout, featNum, strSplit[1]);
-				break;
-			case "InputValue":
-				if (strSplit.length == 3)
-					InputNum(linearLayout, featNum, strSplit[2], Integer.parseInt(strSplit[1]));
-				if (strSplit.length == 2)
-					InputNum(linearLayout, featNum, strSplit[1], 0);
-				break;
-			case "CheckBox":
-				CheckBox(linearLayout, featNum, strSplit[1], switchedOn);
-				break;
-			case "RadioButton":
-				RadioButton(linearLayout, featNum, strSplit[1], strSplit[2]);
-				break;
-			case "Collapse":
-				Collapse(linearLayout, strSplit[1], switchedOn);
-				subFeat++;
-				break;
-			case "ButtonLink":
-				subFeat++;
-				ButtonLink(linearLayout, strSplit[1], strSplit[2]);
-				break;
-			case "Category":
-				subFeat++;
-				Category(linearLayout, strSplit[1]);
-				break;
-			case "RichTextView":
-				subFeat++;
-				TextView(linearLayout, strSplit[1]);
-				break;
-			case "RichWebView":
-				subFeat++;
-				WebTextView(linearLayout, strSplit[1]);
-				break;
+				case "Toggle":
+					Switch(linearLayout, featNum, strSplit[1], switchedOn);
+					break;
+				case "SeekBar":
+					SeekBar(linearLayout, featNum, strSplit[1], Integer.parseInt(strSplit[2]),
+							Integer.parseInt(strSplit[3]));
+					break;
+				case "Button":
+					Button(linearLayout, featNum, strSplit[1]);
+					break;
+				case "ButtonOnOff":
+					ButtonOnOff(linearLayout, featNum, strSplit[1], switchedOn);
+					break;
+				case "Spinner":
+					TextView(linearLayout, strSplit[1]);
+					Spinner(linearLayout, featNum, strSplit[1], strSplit[2]);
+					break;
+				case "InputText":
+					InputText(linearLayout, featNum, strSplit[1]);
+					break;
+				case "InputValue":
+					if (strSplit.length == 3)
+						InputNum(linearLayout, featNum, strSplit[2], Integer.parseInt(strSplit[1]));
+					if (strSplit.length == 2)
+						InputNum(linearLayout, featNum, strSplit[1], 0);
+					break;
+				case "CheckBox":
+					CheckBox(linearLayout, featNum, strSplit[1], switchedOn);
+					break;
+				case "RadioButton":
+					RadioButton(linearLayout, featNum, strSplit[1], strSplit[2]);
+					break;
+				case "Collapse":
+					Collapse(linearLayout, strSplit[1], switchedOn);
+					subFeat++;
+					break;
+				case "ButtonLink":
+					subFeat++;
+					ButtonLink(linearLayout, strSplit[1], strSplit[2]);
+					break;
+				case "Category":
+					subFeat++;
+					Category(linearLayout, strSplit[1]);
+					break;
+				case "RichTextView":
+					subFeat++;
+					TextView(linearLayout, strSplit[1]);
+					break;
+				case "RichWebView":
+					subFeat++;
+					WebTextView(linearLayout, strSplit[1]);
+					break;
 			}
 		}
 	}
@@ -517,15 +514,15 @@ public class Menu {
 			public void onCheckedChanged(CompoundButton compoundButton, boolean bool) {
 				Preferences.changeFeatureBool(featName, featNum, bool);
 				switch (featNum) {
-				case -1: //Save perferences
-					Preferences.with(switchR.getContext()).writeBoolean(-1, bool);
-					if (bool == false)
-						Preferences.with(switchR.getContext()).clear(); //Clear perferences if switched off
-					break;
-				case -3:
-					Preferences.isExpanded = bool;
-					scrollView.setLayoutParams(bool ? scrlLLExpanded : scrlLL);
-					break;
+					case -1: //Save perferences
+						Preferences.with(switchR.getContext()).writeBoolean(-1, bool);
+						if (bool == false)
+							Preferences.with(switchR.getContext()).clear(); //Clear perferences if switched off
+						break;
+					case -3:
+						Preferences.isExpanded = bool;
+						scrollView.setLayoutParams(bool ? scrlLLExpanded : scrlLL);
+						break;
 				}
 			}
 		});
@@ -589,13 +586,13 @@ public class Menu {
 			public void onClick(View v) {
 				switch (featNum) {
 
-				case -6:
-					scrollView.removeView(mSettings);
-					scrollView.addView(mods);
-					break;
-				case -100:
-					stopChecking = true;
-					break;
+					case -6:
+						scrollView.removeView(mSettings);
+						scrollView.addView(mods);
+						break;
+					case -100:
+						stopChecking = true;
+						break;
 				}
 				Preferences.changeFeatureInt(featName, featNum, 0);
 			}

@@ -4,13 +4,11 @@
 
 #include "PlayerSearcher.h"
 
-#define libName OBFUSCATE("libil2cpp.so")
 
 void *(*get_current)();
 void *(*get_transform)(void *obj);
 Vector3 (*get_position)(void *obj);
 Vector3 (*worldtoscreen)(void *cam, Vector3 obj);
-
 
 
 bool isInsideFov(int x, int y) {
@@ -19,8 +17,6 @@ bool isInsideFov(int x, int y) {
     int rad = fov;
     return (x - circle_x) * (x - circle_x) + (y - circle_y) * (y - circle_y) <= rad * rad;
 }
-
-
 
 
 void (*old_update)(void *p);
@@ -33,7 +29,6 @@ void _update(void *p) {
              }
          }
          clearPlayers();
-        
      }
      return old_update(p);
 }
@@ -42,12 +37,12 @@ void _update(void *p) {
 void (*old_myPlayer)(void *player);
 void _myPlayer(void *player) {
     if (player != NULL) {
-        
-      if (aimbot) {    
+
+      if (aimbot) {
         for (int i = 0; i < players.size(); i++) {
          auto Player = players[i];
           if (Player != nullptr) {
-          if (isAlive(Player)) { 
+          if (isAlive(Player)) {
           Vector3 Me = get_position(get_transform(get_current()));
           Vector3 Pos3d = get_position(get_transform(Player));
           Vector3 Target = {Pos3d.x, Pos3d.y + 1.3, Pos3d.z};    
@@ -58,7 +53,7 @@ void _myPlayer(void *player) {
           float xx = angles.pitch;
           float yy = angles.yaw;
           // Find this Filed Name "_lookDir" In your dump.cs
-          //public Vector2 _lookDir; // 0xA8      
+          //public Vector2 _lookDir; // 0xA8
           *(Vector2 *)((uintptr_t) player + 0xA8) = Vector2(xx, yy);
           }
           } else {

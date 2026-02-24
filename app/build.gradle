@@ -1,14 +1,14 @@
 plugins {
-id 'com.android.application'
+	id 'com.android.application'
 }
 
 android {
-compileSdk 34
-namespace = "com.android.support"
+	compileSdk 34
+	namespace = "com.android.support"
 
-defaultConfig {
+	defaultConfig {
         applicationId "com.android.support"
-        minSdk 21
+        minSdkVersion 24
 		targetSdk 34
 		versionCode 1
 		versionName "2.8"
@@ -18,21 +18,21 @@ defaultConfig {
         signingConfig = signingConfigs.debug
     }
     buildTypes {
-	release {
-	minifyEnabled false
-	proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+		release {
+			minifyEnabled false
+			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+		}
 	}
-	}
-    compileOptions {
-	sourceCompatibility JavaVersion.VERSION_17
-	targetCompatibility JavaVersion.VERSION_17
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_11
+		targetCompatibility JavaVersion.VERSION_11
 	}
 	externalNativeBuild {
-	ndkBuild {
-	path file('src/main/jni/Android.mk')
+		ndkBuild {
+			path file('src/main/jni/Android.mk')
+		}
 	}
-}
-
+	
 }
 
 //dependencies must be placed below 'android' brackets to get it work on AIDE

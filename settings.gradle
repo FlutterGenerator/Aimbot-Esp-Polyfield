@@ -5,5 +5,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "uk.lgl"
+rootProject.name = "Aimbot-Esp-Polyfield"
 include ':app'

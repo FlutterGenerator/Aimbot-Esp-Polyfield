@@ -19,95 +19,115 @@
 #include <Substrate/SubstrateHook.h>
 #include <Substrate/CydiaSubstrate.h>
 
+#include "KittyMemory/MemoryPatch.h"
+
+//Target lib here
+#define targetLibName OBFUSCATE("libil2cpp.so")
+
+//bool feature1, feature2, featureHookToggle, Health;
+
+// Hooking examples. Assuming you know how to write hook
+
+
 ESP espOverlay;
 
 void DrawESP(ESP esp, int screenWidth, int screenHeight) {
-   
+
     screenW = screenWidth;
     screenH = screenHeight;
-   
+
     esp.DrawFilledCircle(Color(255,255,255,255), Vector2(screenWidth / 2, screenHeight / 9), 48.0f);
     std::string count;
     count += std::to_string(players.size());
-    esp.DrawText(Color(0,0,0,255), count.c_str(), Vector2(screenWidth / 2, screenHeight / 8), 65.0f); 
+    esp.DrawText(Color(0,0,0,255), count.c_str(), Vector2(screenWidth / 2, screenHeight / 8), 65.0f);
 
     if (aimbot) {
-        esp.DrawCircle(Color(255, 255, 255, 255), 1.0f, Vector2(screenWidth / 2, screenHeight / 2), fov);    
+        esp.DrawCircle(Color(255, 255, 255, 255), 1.0f, Vector2(screenWidth / 2, screenHeight / 2), fov);
     }
-    
+
     if (Esp) {
-              
-         for (int i = 0; i < players.size(); i++) {
-               auto Player = players[i];
-                 if (Player != nullptr) {
-                    if (isAlive(Player)) { 
-                     Vector3 Pos3d = get_position(get_transform(Player));
-                     Vector3 FakePos = {Pos3d.x, Pos3d.y + 1.3, Pos3d.z};
-                     Vector3 Pos2d = worldtoscreen(get_current(), FakePos);                                 
-                     if (Pos2d.z < 1.0f) continue;
-                     
-                     Vector2 From = Vector2(screenWidth / 2, screenHeight / 8.8);
-                     Vector2 To = Vector2(Pos2d.x, screenHeight - Pos2d.y);
-                     
-                     if (EspLine) {
-                         esp.DrawLine(Color(255,255,255,255), 1.0f, From, To);
-                     }
 
-if (EspBox) {
-    float boxHeight = 200.0f;   // высота бокса (настрой себе)
-    float boxWidth  = 80.0f;    // ширина бокса
+        for (int i = 0; i < players.size(); i++) {
+            auto Player = players[i];
+            if (Player != nullptr) {
+                if (isAlive(Player)) {
+                    Vector3 Pos3d = get_position(get_transform(Player));
+                    Vector3 FakePos = {Pos3d.x, Pos3d.y + 1.3, Pos3d.z};
+                    Vector3 Pos2d = worldtoscreen(get_current(), FakePos);
+                    if (Pos2d.z < 1.0f) continue;
 
-    Rect rect;
-    rect.x = Pos2d.x - boxWidth / 2;
-    rect.y = screenHeight - Pos2d.y - boxHeight;
-    rect.width = boxWidth;
-    rect.height = boxHeight;
+                    Vector2 From = Vector2(screenWidth / 2, screenHeight / 8.8);
+                    Vector2 To = Vector2(Pos2d.x, screenHeight - Pos2d.y);
 
-    esp.DrawBox(Color(255,255,255,255), 2.0f, rect);
-}
+                    if (EspLine) {
+                        esp.DrawLine(Color(255,255,255,255), 1.0f, From, To);
+                    }
 
-                 } else {
-                     players.clear();
-                     clearPlayers();
-                 }
-         }
-       }
+                    if (EspBox) {
+                        float boxHeight = 200.0f;   // высота бокса (настрой себе)
+                        float boxWidth  = 80.0f;    // ширина бокса
+
+                        Rect rect;
+                        rect.x = Pos2d.x - boxWidth / 2;
+                        rect.y = screenHeight - Pos2d.y - boxHeight;
+                        rect.width = boxWidth;
+                        rect.height = boxHeight;
+
+                        esp.DrawBox(Color(255,255,255,255), 2.0f, rect);
+                    }
+
+                } else {
+                    players.clear();
+                    clearPlayers();
+                }
+            }
+        }
     }
- 
+
 }
 
 void *hack_thread(void *) {
     do {
         sleep(1);
-    } while (!isLibraryLoaded(libName));
-       
+    } while (!isLibraryLoaded(targetLibName));
+
+#if defined(__aarch64__) //To compile this code for arm64 lib only. Do not worry about greyed out highlighting code, it still works
+
+
+
+#else //To compile this code for armv7 lib only.
+
     // public sealed class Camera
-    // public static Camera get_main()  
-    get_current = (void *(*)())getAbsoluteAddress("libil2cpp.so", 0x2072AB0);
-    
+    // public static Camera get_main()
+    get_current = (void *(*)())getAbsoluteAddress(targetLibName, 0x208E7D0);
+
     // public class Component
     // public Transform get_transform()
-    get_transform = (void *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x209D61C);
-    
+    get_transform = (void *(*)(void *))getAbsoluteAddress(targetLibName, 0x20B925C);
+
     // public class Transform
     // public Vector3 get_position() { }
-    get_position = (Vector3 (*)(void *))getAbsoluteAddress("libil2cpp.so", 0x20AB558);
-    
+    get_position = (Vector3 (*)(void *))getAbsoluteAddress(targetLibName, 0x20C7198);
+
     // public sealed class Camera
     // public Vector3 WorldToScreenPoint(Vector3 position) { }
-    worldtoscreen = (Vector3 (*)(void *, Vector3))getAbsoluteAddress("libil2cpp.so", 0x20727BC);
-    
+    worldtoscreen = (Vector3 (*)(void *, Vector3))getAbsoluteAddress(targetLibName, 0x208E4DC);
+
     // public class Object
     // private static bool IsNativeObjectAlive
-    isAlive = (bool *(*)(void *))getAbsoluteAddress("libil2cpp.so", 0x20A4B6C);
-    
+    isAlive = (bool *(*)(void *))getAbsoluteAddress(targetLibName, 0x20C07AC);
+
     // public class NpcControl
     // private void Update() { }
-    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9B4D88), (void *)&_update, (void **)&old_update); // Accoring to your game . Hope You Find this offset 😁
-    
+    MSHookFunction((void *)getAbsoluteAddress(targetLibName, 0x9B96D8), (void *)&_update, (void **)&old_update); // Accoring to your game . Hope You Find this offset 😁
+
     // public class PlayerControl
     // private void Update() { }
-    MSHookFunction((void *)getAbsoluteAddress("libil2cpp.so", 0x9D2120), (void *)&_myPlayer, (void **)&old_myPlayer); // Accoring to your game . Hope You Find this offset 😁
+    MSHookFunction((void *)getAbsoluteAddress(targetLibName, 0x9D6A6C), (void *)&_myPlayer, (void **)&old_myPlayer); // Accoring to your game . Hope You Find this offset 😁
+
+    LOGI(OBFUSCATE("Done"));
+#endif
+
 
     return NULL;
 }
@@ -140,13 +160,23 @@ void Changes(JNIEnv *env, jclass clazz, jobject obj,
                                         jint featNum, jstring featName, jint value,
                                         jboolean boolean, jstring str) {
     switch (featNum) {
-       
-        case 0: Esp = boolean; break;
-        case 1: EspLine = boolean; break;
-        case 2: aimbot = boolean; break;
-        case 3: fov = value; break;
-        case 4: EspBox = boolean; break;
-       
+
+        case 0:
+            Esp = boolean;
+            break;
+        case 1:
+            EspLine = boolean;
+            break;
+        case 2:
+            aimbot = boolean;
+            break;
+        case 3:
+            fov = value;
+            break;
+        case 4:
+            EspBox = boolean;
+        break;
+
     }
 }
 
