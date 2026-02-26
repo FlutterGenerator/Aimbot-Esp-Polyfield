@@ -49,7 +49,7 @@ float Weaponfov;
 float speedvalue = 0;
 
 // Chams code
-bool wireframe, glow, outline, chams, rainbow;
+bool wireframe = false, glow = false, outline = false, chams = false, rainbow = false;
 
 // Hooking examples. Assuming you know how to write hook
 
