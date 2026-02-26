@@ -1,7 +1,7 @@
-vector<void*> players;
+vector<void *> players;
 
 void clearPlayers() {
-    vector<void*> pls;
+    vector<void *> pls;
     for (int i = 0; i < players.size(); i++) {
         if (players[i] != NULL) {
             pls.push_back(players[i]);

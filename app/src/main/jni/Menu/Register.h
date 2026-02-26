@@ -2,7 +2,8 @@
 // Register your class native methods. This is to hide function names from disassembler
 // See more: https://developer.android.com/training/articles/perf-jni#native-libraries
 
-jint Register(JNIEnv *globalEnv, const char* classPath, const JNINativeMethod* methods, jint nMethods) {
+jint
+Register(JNIEnv *globalEnv, const char *classPath, const JNINativeMethod *methods, jint nMethods) {
     jclass c = globalEnv->FindClass(classPath);
     if (c != nullptr) {
 
