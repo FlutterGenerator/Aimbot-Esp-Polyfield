@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-	compileSdk 36
+	compileSdkVersion 36
 	namespace = "com.android.support"
 
 	defaultConfig {
         applicationId "com.android.support"
         minSdkVersion 24
-		targetSdk 36
+		targetSdkVersion 36
 		versionCode 1
 		versionName "2.8"
         ndk {
