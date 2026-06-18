@@ -59,10 +59,12 @@ void (*old_FirerateUpdate)(void *instance);
 void FirerateUpdateMod(void *instance) {
     if (instance != NULL) {
         if (Ammo) {
-            *(int *) ((uint32_t) instance + 0x88) = 999;
+        // Namespace: public class Weapon : MonoBehaviour public int ammo; // 0x8C
+            *(int *) ((uint32_t) instance + 0x8C) = 999;
         }
         if (Firerate) {
-            *(int *) ((uint32_t) instance + 0x1C) = 999;
+        // Namespace: public class Weapon : MonoBehaviour public int fireRate; // 0x20
+            *(int *) ((uint32_t) instance + 0x20) = 999;
         }
     }
     return old_FirerateUpdate(instance);
@@ -73,12 +75,15 @@ void (*old_GmUpdate)(void *instance);
 void GmUpdateMod(void *instance) {
     if (instance != NULL) {
         if (Gm) {
+        // Namespace: public class PlayerControl : NetworkBehaviour private int health; // 0x60
             *(int *) ((uint32_t) instance + 0x60) = 9999;
         }
         if (Fastresp) {
+        // Namespace: public class PlayerControl : NetworkBehaviour public float respawnTimer; // 0x5C
             *(float *) ((uint32_t) instance + 0x5C) = -1;
         }
         if (speedvalue) {
+        // Namespace: public class PlayerControl : NetworkBehaviour public float playerSpeed; // 0x80
             *(float *) ((uint32_t) instance + 0x80) = speedvalue;
         }
     }
@@ -90,10 +95,12 @@ void (*old_RedscoreUpdate)(void *instance);
 void RedscoreUpdateMod(void *instance) {
     if (instance != NULL) {
         if (Redscore) {
-            *(int *) ((uint32_t) instance + 0x94) = 999;
+        // Namespace: public class GameManager : NetworkBehaviour public int redScore; // 0x9C
+            *(int *) ((uint32_t) instance + 0x9C) = 999;
         }
         if (Bluescore) {
-            *(int *) ((uint32_t) instance + 0x90) = 999;
+        // Namespace: public class GameManager : NetworkBehaviour public int blueScore; // 0x98
+            *(int *) ((uint32_t) instance + 0x98) = 999;
         }
     }
     return old_RedscoreUpdate(instance);
@@ -172,7 +179,7 @@ void DrawESP(ESP esp, int screenWidth, int screenHeight) {
 void *hack_thread(void *) {
     ProcMap il2cppMap;
     do {
-        il2cppMap = KittyMemory::getLibraryMap("libil2cpp.so");
+        il2cppMap = KittyMemory::getLibraryMap(targetLibName);
         sleep(1);
     } while (!isLibraryLoaded(targetLibName) && mlovinit());
     setShader("_MainTex");
@@ -186,52 +193,60 @@ void *hack_thread(void *) {
 
     // public sealed class Camera
     // public static Camera get_main()
-    get_current = (void *(*)()) getAbsoluteAddress(targetLibName, 0x208E7D0);
+    get_current = (void *(*)()) getAbsoluteAddress("libil2cpp.so", 0x20DBA78);
 
     // public class Component
     // public Transform get_transform()
-    get_transform = (void *(*)(void *)) getAbsoluteAddress(targetLibName, 0x20B925C);
+    get_transform = (void *(*)(void *)) getAbsoluteAddress("libil2cpp.so", 0x2106754);
 
     // public class Transform
     // public Vector3 get_position() { }
-    get_position = (Vector3 (*)(void *)) getAbsoluteAddress(targetLibName, 0x20C7198);
+    get_position = (Vector3 (*)(void *)) getAbsoluteAddress("libil2cpp.so", 0x2114690);
 
     // public sealed class Camera
     // public Vector3 WorldToScreenPoint(Vector3 position) { }
-    worldtoscreen = (Vector3 (*)(void *, Vector3)) getAbsoluteAddress(targetLibName, 0x208E4DC);
+    worldtoscreen = (Vector3 (*)(void *, Vector3)) getAbsoluteAddress("libil2cpp.so", 0x20DB784);
 
     // public class Object
     // private static bool IsNativeObjectAlive
-    isAlive = (bool *(*)(void *)) getAbsoluteAddress(targetLibName, 0x20C07AC);
+    isAlive = (bool *(*)(void *)) getAbsoluteAddress("libil2cpp.so", 0x210DCA4);
 
     // public class NpcControl
     // private void Update() { }
-    MSHookFunction((void *) getAbsoluteAddress(targetLibName, 0x9B96D8), (void *) &_update,
+    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x9CEC58), (void *) &_update,
                    (void **) &old_update); // Accoring to your game . Hope You Find this offset 😁
 
     // public class PlayerControl
     // private void Update() { }
-    MSHookFunction((void *) getAbsoluteAddress(targetLibName, 0x9D6A6C), (void *) &_myPlayer,
+    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x9EC5DC), (void *) &_myPlayer,
                    (void **) &old_myPlayer); // Accoring to your game . Hope You Find this offset 😁
+                   
+    // Namespace: public class Weapon : MonoBehaviour public void WeaponShoot() { }
+    hexPatches.Fire = MemoryPatch::createWithHex("libil2cpp.so", 0xA783A8, "1EFF2FE1");
+    
+    // Namespace: public class Weapon : MonoBehaviour public void WeaponReload() { }
+    hexPatches.Reload = MemoryPatch::createWithHex("libil2cpp.so", 0xA78D68, "1EFF2FE1");
+    
+    // Namespace: public class Grenade : MonoBehaviour private void Update() { }
+    hexPatches.Grenade = MemoryPatch::createWithHex("libil2cpp.so", 0xA75ECC, "1EFF2FE1");
 
-    hexPatches.Fire = MemoryPatch::createWithHex("libil2cpp.so", 0xA5966C, "1EFF2FE1");
-
-    hexPatches.Reload = MemoryPatch::createWithHex("libil2cpp.so", 0xA5A040, "1EFF2FE1");
-
-    hexPatches.Grenade = MemoryPatch::createWithHex("libil2cpp.so", 0xA574AC, "1EFF2FE1");
-
-    hexPatches.Spawn = MemoryPatch::createWithHex("libil2cpp.so", 0x9C9408, "1EFF2FE1");
-
-    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0xA590E8),
+    // Namespace: public class NpcManager : NetworkBehaviour private void SpawnNpc(int _count, string _team) { }
+    hexPatches.Spawn = MemoryPatch::createWithHex("libil2cpp.so", 0x9DEA38, "1EFF2FE1");
+    
+    // Namespace: public class Weapon : MonoBehaviour private void Update() { }
+    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0xA77C8C),
                    (void *) FirerateUpdateMod, (void **) &old_FirerateUpdate);
 
-    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x9DEA90), (void *) GmUpdateMod,
+    // Namespace: public class PlayerControl : NetworkBehaviour private void LateUpdate() { }
+    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x9F49BC), (void *) GmUpdateMod,
                    (void **) &old_GmUpdate);
 
-    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x97B66C),
+    // Namespace: public class GameManager : NetworkBehaviour private void UpdateScores() { }
+    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x98E5AC),
                    (void *) RedscoreUpdateMod, (void **) &old_RedscoreUpdate);
-
-    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x208DECC), (void *) Weapon,
+                   
+    // Namespace: UnityEngine public sealed class Camera : Behaviour public float get_fieldOfView() { }
+    MSHookFunction((void *) getAbsoluteAddress("libil2cpp.so", 0x20DB174), (void *) Weapon,
                    (void **) &old_Weapon);
 
 
