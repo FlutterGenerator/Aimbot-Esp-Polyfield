@@ -157,12 +157,16 @@ public:
                                  (int) color.g, (int) color.b, stroke, pos.X, pos.Y, width, height);
         }
     }
-    
-	void DrawBox(Color color, float stroke, Rect rect) {
-        Vector2 v1 = Vector2(rect.x, rect.y);
-        Vector2 v2 = Vector2(rect.x + rect.width, rect.y);
-        Vector2 v3 = Vector2(rect.x + rect.width, rect.y + rect.height);
-        Vector2 v4 = Vector2(rect.x, rect.y + rect.height);
+
+    void DrawBox(Color color, float stroke, Rect rect)
+    {
+        if (rect.width <= 0 || rect.height <= 0)
+            return;
+
+        Vector2 v1(rect.x, rect.y);
+        Vector2 v2(rect.x + rect.width, rect.y);
+        Vector2 v3(rect.x + rect.width, rect.y + rect.height);
+        Vector2 v4(rect.x, rect.y + rect.height);
 
         DrawLine(color, stroke, v1, v2);
         DrawLine(color, stroke, v2, v3);

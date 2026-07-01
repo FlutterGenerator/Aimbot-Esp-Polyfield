@@ -1,4 +1,11 @@
+//Please don't replace listeners with lambda!
+
 package com.android.support;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
+import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -8,22 +15,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.Canvas;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.Html;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.method.DigitsKeyListener;
 import android.util.Base64;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -55,30 +62,30 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
-import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
-
 public class Menu {
+    //********** Here you can easly change the menu appearance **********//
 
-    int TEXT_COLOR = Color.parseColor("#FFFFFF");
+    //region Variable
+    public static final String TAG = "Mod_Menu"; //Tag for logcat
+
+    int TEXT_COLOR = Color.parseColor("#82CAFD");
     int TEXT_COLOR_2 = Color.parseColor("#FFFFFF");
     int BTN_COLOR = Color.parseColor("#1C262D");
-    int MENU_BG_COLOR = Color.parseColor("#202020");//#AARRGGBB
+    int MENU_BG_COLOR = Color.parseColor("#EE1C2A35"); //#AARRGGBB
     int MENU_FEATURE_BG_COLOR = Color.parseColor("#DD141C22"); //#AARRGGBB
     int MENU_WIDTH = 290;
     int MENU_HEIGHT = 210;
     int POS_X = 0;
     int POS_Y = 100;
 
-    float MENU_CORNER = 20f;
-    int ICON_SIZE = 50; //Change both width and height of image
-    float ICON_ALPHA = 1f; //Transparent
+    float MENU_CORNER = 4f;
+    int ICON_SIZE = 45; //Change both width and height of image
+    float ICON_ALPHA = 0.7f; //Transparent
     int ToggleON = Color.GREEN;
     int ToggleOFF = Color.RED;
     int BtnON = Color.parseColor("#1b5e20");
     int BtnOFF = Color.parseColor("#7f0000");
+    int CategoryBG = Color.parseColor("#2F3D4C");
     int SeekBarColor = Color.parseColor("#80CBC4");
     int SeekBarProgressColor = Color.parseColor("#80CBC4");
     int CheckBoxColor = Color.parseColor("#80CBC4");
@@ -97,6 +104,7 @@ public class Menu {
     boolean stopChecking, overlayRequired;
     Context getContext;
 
+    //initialize methods from the native library
     native void Init(Context context, TextView title, TextView subTitle);
 
     native String Icon();
@@ -105,36 +113,44 @@ public class Menu {
 
     native String[] GetFeatureList();
 
+    native String[] SettingsList();
+
     native boolean IsGameLibLoaded();
 
     public static native void DrawOn(ESPView espView, Canvas canvas);
 
-    private ESPView overlayView;
+    private final ESPView overlayView;
 
-    @SuppressLint("WrongConstant")
+    @SuppressLint({"WrongConstant", "ObsoleteSdkInt"})
     private void DrawCanvas(Context context) {
-        mWindowManager = ((Activity) context).getWindowManager();
-        int aditionalFlags = 0;
+
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+
+        int aditionalFlags = WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+
         if (Build.VERSION.SDK_INT >= 24)
-            aditionalFlags = WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
-        if (Build.VERSION.SDK_INT >= 24)
-            aditionalFlags = aditionalFlags | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        espParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_APPLICATION,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | aditionalFlags,
-                PixelFormat.TRANSPARENT);
-        espParams.format = -3;
+            aditionalFlags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+
+        espParams = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                PixelFormat.TRANSLUCENT
+        );
+
         espParams.gravity = Gravity.CENTER;
-        espParams.flags = 24;
-        espParams.width = -1;
-        espParams.height = -1;
         espParams.x = 0;
         espParams.y = 0;
 
         mWindowManager.addView(overlayView, espParams);
     }
 
+    //Here we write the code for our Menu
+    // Reference: https://www.androidhive.info/2016/11/android-floating-widget-like-facebook-chat-head/
     public Menu(Context context) {
 
         getContext = context;
@@ -151,13 +167,13 @@ public class Menu {
         mExpanded.setVisibility(View.GONE);
         mExpanded.setBackgroundColor(MENU_BG_COLOR);
         mExpanded.setOrientation(LinearLayout.VERTICAL);
-        mExpanded.setPadding(1, 1, 1, 1); //So borders would be visible
+        // mExpanded.setPadding(1, 1, 1, 1); //So borders would be visible
         mExpanded.setLayoutParams(new LinearLayout.LayoutParams(dp(MENU_WIDTH), WRAP_CONTENT));
         GradientDrawable gdMenuBody = new GradientDrawable();
         gdMenuBody.setCornerRadius(MENU_CORNER); //Set corner
         gdMenuBody.setColor(MENU_BG_COLOR); //Set background color
-        //gdMenuBody.setStroke(1, Color.parseColor("#32cb00")); //Set border
-        mExpanded.setBackground(gdMenuBody); //Apply GradientDrawable to it
+        gdMenuBody.setStroke(1, Color.parseColor("#32cb00")); //Set border
+        //mExpanded.setBackground(gdMenuBody); //Apply GradientDrawable to it
 
         //********** The icon to open mod menu **********
         startimage = new ImageView(context);
@@ -185,13 +201,49 @@ public class Menu {
         int applyDimension2 = (int) TypedValue.applyDimension(1, ICON_SIZE, context.getResources().getDisplayMetrics()); //Icon size
         wView.getLayoutParams().height = applyDimension2;
         wView.getLayoutParams().width = applyDimension2;
-        wView.loadData("<html>" + "<head></head>" + "<body style=\"margin: 0; padding: 0\">" + "<img src=\""
-                + IconWebViewData() + "\" width=\"" + ICON_SIZE + "\" height=\"" + ICON_SIZE + "\" >" + "</body>"
-                + "</html>", "text/html", "utf-8");
+        wView.loadData("<html>" +
+                "<head></head>" +
+                "<body style=\"margin: 0; padding: 0\">" +
+                "<img src=\"" + IconWebViewData() + "\" width=\"" + ICON_SIZE + "\" height=\"" + ICON_SIZE + "\" >" +
+                "</body>" +
+                "</html>", "text/html", "utf-8");
         wView.setBackgroundColor(0x00000000); //Transparent
         wView.setAlpha(ICON_ALPHA);
-
         wView.setOnTouchListener(onTouchListener());
+
+        //********** Settings icon **********
+        TextView settings = new TextView(context); //Android 5 can't show ⚙, instead show other icon instead
+        settings.setText(Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ? "⚙" : "\uD83D\uDD27");
+        settings.setTextColor(TEXT_COLOR);
+        settings.setTypeface(Typeface.DEFAULT_BOLD);
+        settings.setTextSize(20.0f);
+        RelativeLayout.LayoutParams rlsettings = new RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        rlsettings.addRule(ALIGN_PARENT_RIGHT);
+        settings.setLayoutParams(rlsettings);
+        settings.setOnClickListener(new View.OnClickListener() {
+            boolean settingsOpen;
+
+            @Override
+            public void onClick(View v) {
+                try {
+                    settingsOpen = !settingsOpen;
+                    if (settingsOpen) {
+                        scrollView.removeView(mods);
+                        scrollView.addView(mSettings);
+                        scrollView.scrollTo(0, 0);
+                    } else {
+                        scrollView.removeView(mSettings);
+                        scrollView.addView(mods);
+                    }
+                } catch (IllegalStateException e) {
+                }
+            }
+        });
+
+        //********** Settings **********
+        mSettings = new LinearLayout(context);
+        mSettings.setOrientation(LinearLayout.VERTICAL);
+        featureList(SettingsList(), mSettings);
 
         //********** Title **********
         RelativeLayout titleText = new RelativeLayout(context);
@@ -233,22 +285,29 @@ public class Menu {
         relativeLayout.setPadding(10, 3, 10, 3);
         relativeLayout.setVerticalGravity(Gravity.CENTER);
 
-        //**********  Hide button **********
+        //**********  Hide/Kill button **********
         RelativeLayout.LayoutParams lParamsHideBtn = new RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
         lParamsHideBtn.addRule(ALIGN_PARENT_LEFT);
 
         Button hideBtn = new Button(context);
         hideBtn.setLayoutParams(lParamsHideBtn);
         hideBtn.setBackgroundColor(Color.TRANSPARENT);
-        hideBtn.setText("HIDE");
+        hideBtn.setText("HIDE/KILL (Hold)");
         hideBtn.setTextColor(TEXT_COLOR);
         hideBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 mCollapsed.setVisibility(View.VISIBLE);
                 mCollapsed.setAlpha(0);
                 mExpanded.setVisibility(View.GONE);
-                Toast.makeText(view.getContext(), "Icon hidden. Remember the hidden icon position", Toast.LENGTH_LONG)
-                        .show();
+                Toast.makeText(view.getContext(), "Icon hidden. Remember the hidden icon position", Toast.LENGTH_LONG).show();
+            }
+        });
+        hideBtn.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View view) {
+                Toast.makeText(view.getContext(), "Menu killed", Toast.LENGTH_LONG).show();
+                rootFrame.removeView(mRootContainer);
+                mWindowManager.removeView(rootFrame);
+                return false;
             }
         });
 
@@ -259,7 +318,7 @@ public class Menu {
         Button closeBtn = new Button(context);
         closeBtn.setLayoutParams(lParamsCloseBtn);
         closeBtn.setBackgroundColor(Color.TRANSPARENT);
-        closeBtn.setText("CLOSE");
+        closeBtn.setText("MINIMIZE");
         closeBtn.setTextColor(TEXT_COLOR);
         closeBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -278,6 +337,7 @@ public class Menu {
             mCollapsed.addView(startimage);
         }
         titleText.addView(title);
+        titleText.addView(settings);
         mExpanded.addView(titleText);
         mExpanded.addView(subTitle);
         scrollView.addView(mods);
@@ -295,16 +355,17 @@ public class Menu {
     public void ShowMenu() {
         rootFrame.addView(mRootContainer);
 
-        final Handler handler = new Handler(Looper.getMainLooper());
+        final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             boolean viewLoaded = false;
 
             @Override
             public void run() {
+                //If the save preferences is enabled, it will check if game lib is loaded before starting menu
+                //Comment the if-else code out except startService if you want to run the app and test preferences
                 if (Preferences.loadPref && !IsGameLibLoaded() && !stopChecking) {
                     if (!viewLoaded) {
-                        Category(mods,
-                                "Save preferences was been enabled. Waiting for game lib to be loaded...\n\nForce load menu may not apply mods instantly. You would need to reactivate them again");
+                        Category(mods, "Save preferences was been enabled. Waiting for game lib to be loaded...\n\nForce load menu may not apply mods instantly. You would need to reactivate them again");
                         Button(mods, -100, "Force load menu");
                         viewLoaded = true;
                     }
@@ -335,14 +396,18 @@ public class Menu {
 
     @SuppressLint("WrongConstant")
     public void SetWindowManagerActivity() {
-        vmParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT, POS_X, //initialX
-                POS_Y, //initialy
+        vmParams = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                POS_X,//initialX
+                POS_Y,//initialy
                 WindowManager.LayoutParams.TYPE_APPLICATION,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.TRANSPARENT);
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN |
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                        WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSPARENT
+        );
         vmParams.gravity = 51;
         vmParams.x = POS_X;
         vmParams.y = POS_Y;
@@ -438,8 +503,7 @@ public class Menu {
                     Switch(linearLayout, featNum, strSplit[1], switchedOn);
                     break;
                 case "SeekBar":
-                    SeekBar(linearLayout, featNum, strSplit[1], Integer.parseInt(strSplit[2]),
-                            Integer.parseInt(strSplit[3]));
+                    SeekBar(linearLayout, featNum, strSplit[1], Integer.parseInt(strSplit[2]), Integer.parseInt(strSplit[3]));
                     break;
                 case "Button":
                     Button(linearLayout, featNum, strSplit[1]);
@@ -493,17 +557,24 @@ public class Menu {
     private void Switch(LinearLayout linLayout, final int featNum, final String featName, boolean swiOn) {
         final Switch switchR = new Switch(getContext);
         ColorStateList buttonStates = new ColorStateList(
-                new int[][]{new int[]{-android.R.attr.state_enabled}, new int[]{android.R.attr.state_checked},
-                        new int[]{}},
-                new int[]{Color.BLUE, ToggleON, // ON
+                new int[][]{
+                        new int[]{-android.R.attr.state_enabled},
+                        new int[]{android.R.attr.state_checked},
+                        new int[]{}
+                },
+                new int[]{
+                        Color.BLUE,
+                        ToggleON, // ON
                         ToggleOFF // OFF
-                });
+                }
+        );
         //Set colors of the switch. Comment out if you don't like it
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
                 switchR.getThumbDrawable().setTintList(buttonStates);
                 switchR.getTrackDrawable().setTintList(buttonStates);
             } catch (NullPointerException ex) {
+                Log.d(TAG, String.valueOf(ex));
             }
         }
         switchR.setText(featName);
@@ -538,9 +609,7 @@ public class Menu {
         linearLayout.setGravity(Gravity.CENTER);
 
         final TextView textView = new TextView(getContext);
-        textView.setText(Html.fromHtml(
-                featName + ": <font color='" + NumberTxtColor + "'>" + ((loadedProg == 0) ? min : loadedProg),
-                Html.FROM_HTML_MODE_LEGACY));
+        textView.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + ((loadedProg == 0) ? min : loadedProg)));
         textView.setTextColor(TEXT_COLOR_2);
 
         SeekBar seekBar = new SeekBar(getContext);
@@ -562,9 +631,7 @@ public class Menu {
                 //if progress is greater than minimum, don't go below. Else, set progress
                 seekBar.setProgress(i < min ? min : i);
                 Preferences.changeFeatureInt(featName, featNum, i < min ? min : i);
-                textView.setText(
-                        Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + (i < min ? min : i),
-                                Html.FROM_HTML_MODE_LEGACY));
+                textView.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + (i < min ? min : i)));
             }
         });
         linearLayout.addView(textView);
@@ -580,7 +647,7 @@ public class Menu {
         button.setLayoutParams(layoutParams);
         button.setTextColor(TEXT_COLOR_2);
         button.setAllCaps(false); //Disable caps to support html
-        button.setText(Html.fromHtml(featName, Html.FROM_HTML_MODE_LEGACY));
+        button.setText(Html.fromHtml(featName));
         button.setBackgroundColor(BTN_COLOR);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -608,7 +675,7 @@ public class Menu {
         button.setLayoutParams(layoutParams);
         button.setAllCaps(false); //Disable caps to support html
         button.setTextColor(TEXT_COLOR_2);
-        button.setText(Html.fromHtml(featName, Html.FROM_HTML_MODE_LEGACY));
+        button.setText(Html.fromHtml(featName));
         button.setBackgroundColor(BTN_COLOR);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -632,11 +699,11 @@ public class Menu {
         final String finalfeatName = featName.replace("OnOff_", "");
         boolean isOn = Preferences.loadPrefBool(featName, featNum, switchedOn);
         if (isOn) {
-            button.setText(Html.fromHtml(finalfeatName + ": ON", Html.FROM_HTML_MODE_LEGACY));
+            button.setText(Html.fromHtml(finalfeatName + ": ON"));
             button.setBackgroundColor(BtnON);
             isOn = false;
         } else {
-            button.setText(Html.fromHtml(finalfeatName + ": OFF", Html.FROM_HTML_MODE_LEGACY));
+            button.setText(Html.fromHtml(finalfeatName + ": OFF"));
             button.setBackgroundColor(BtnOFF);
             isOn = true;
         }
@@ -648,11 +715,11 @@ public class Menu {
                 Preferences.changeFeatureBool(finalfeatName, featNum, isOn);
                 //Log.d(TAG, finalfeatName + " " + featNum + " " + isActive2);
                 if (isOn) {
-                    button.setText(Html.fromHtml(finalfeatName + ": ON", Html.FROM_HTML_MODE_LEGACY));
+                    button.setText(Html.fromHtml(finalfeatName + ": ON"));
                     button.setBackgroundColor(BtnON);
                     isOn = false;
                 } else {
-                    button.setText(Html.fromHtml(finalfeatName + ": OFF", Html.FROM_HTML_MODE_LEGACY));
+                    button.setText(Html.fromHtml(finalfeatName + ": OFF"));
                     button.setBackgroundColor(BtnOFF);
                     isOn = true;
                 }
@@ -662,6 +729,7 @@ public class Menu {
     }
 
     private void Spinner(LinearLayout linLayout, final int featNum, final String featName, final String list) {
+        Log.d(TAG, "spinner " + featNum + " " + featName + " " + list);
         final List<String> lists = new LinkedList<>(Arrays.asList(list.split(",")));
 
         // Create another LinearLayout as a workaround to use it as a background
@@ -704,9 +772,7 @@ public class Menu {
 
         final Button button = new Button(getContext);
         int num = Preferences.loadPrefInt(featName, featNum);
-        button.setText(
-                Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + ((num == 0) ? 1 : num) + "</font>",
-                        Html.FROM_HTML_MODE_LEGACY));
+        button.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + ((num == 0) ? 1 : num) + "</font>"));
         button.setAllCaps(false);
         button.setLayoutParams(layoutParams);
         button.setBackgroundColor(BTN_COLOR);
@@ -726,8 +792,7 @@ public class Menu {
                 editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                     @Override
                     public void onFocusChange(View v, boolean hasFocus) {
-                        InputMethodManager imm = (InputMethodManager) getContext
-                                .getSystemService(getContext.INPUT_METHOD_SERVICE);
+                        InputMethodManager imm = (InputMethodManager) getContext.getSystemService(getContext.INPUT_METHOD_SERVICE);
                         if (hasFocus) {
                             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
                         } else {
@@ -748,8 +813,7 @@ public class Menu {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         int num;
                         try {
-                            num = Integer.parseInt(TextUtils.isEmpty(editText.getText().toString()) ? "0"
-                                    : editText.getText().toString());
+                            num = Integer.parseInt(TextUtils.isEmpty(editText.getText().toString()) ? "0" : editText.getText().toString());
                             if (maxValue != 0 && num >= maxValue)
                                 num = maxValue;
                         } catch (NumberFormatException ex) {
@@ -759,9 +823,7 @@ public class Menu {
                                 num = 2147483640;
                         }
 
-                        button.setText(
-                                Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + num + "</font>",
-                                        Html.FROM_HTML_MODE_LEGACY));
+                        button.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + num + "</font>"));
                         Preferences.changeFeatureInt(featName, featNum, num);
 
                         editText.setFocusable(false);
@@ -771,8 +833,7 @@ public class Menu {
                 alertName.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         // dialog.cancel(); // closes dialog
-                        InputMethodManager imm = (InputMethodManager) getContext
-                                .getSystemService(getContext.INPUT_METHOD_SERVICE);
+                        InputMethodManager imm = (InputMethodManager) getContext.getSystemService(getContext.INPUT_METHOD_SERVICE);
                         imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                     }
                 });
@@ -799,8 +860,7 @@ public class Menu {
         final Button button = new Button(getContext);
 
         String string = Preferences.loadPrefString(featName, featNum);
-        button.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + string + "</font>",
-                Html.FROM_HTML_MODE_LEGACY));
+        button.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + string + "</font>"));
 
         button.setAllCaps(false);
         button.setLayoutParams(layoutParams);
@@ -815,8 +875,7 @@ public class Menu {
                 editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                     @Override
                     public void onFocusChange(View v, boolean hasFocus) {
-                        InputMethodManager imm = (InputMethodManager) getContext
-                                .getSystemService(getContext.INPUT_METHOD_SERVICE);
+                        InputMethodManager imm = (InputMethodManager) getContext.getSystemService(getContext.INPUT_METHOD_SERVICE);
                         if (hasFocus) {
                             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
                         } else {
@@ -836,9 +895,7 @@ public class Menu {
                 alertName.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         String str = editText.getText().toString();
-                        button.setText(
-                                Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + str + "</font>",
-                                        Html.FROM_HTML_MODE_LEGACY));
+                        button.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + str + "</font>"));
                         Preferences.changeFeatureString(featName, featNum, str);
                         editText.setFocusable(false);
                     }
@@ -847,11 +904,11 @@ public class Menu {
                 alertName.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         //dialog.cancel(); // closes dialog
-                        InputMethodManager imm = (InputMethodManager) getContext
-                                .getSystemService(getContext.INPUT_METHOD_SERVICE);
+                        InputMethodManager imm = (InputMethodManager) getContext.getSystemService(getContext.INPUT_METHOD_SERVICE);
                         imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                     }
                 });
+
 
                 if (overlayRequired) {
                     AlertDialog dialog = alertName.create(); // display the dialog
@@ -905,9 +962,7 @@ public class Menu {
             final String finalfeatName = featName, radioName = lists.get(i);
             View.OnClickListener first_radio_listener = new View.OnClickListener() {
                 public void onClick(View v) {
-                    textView.setText(
-                            Html.fromHtml(finalfeatName + ": <font color='" + NumberTxtColor + "'>" + radioName,
-                                    Html.FROM_HTML_MODE_LEGACY));
+                    textView.setText(Html.fromHtml(finalfeatName + ": <font color='" + NumberTxtColor + "'>" + radioName));
                     Preferences.changeFeatureInt(finalfeatName, featNum, radioGroup.indexOfChild(Radioo));
                 }
             };
@@ -922,13 +977,13 @@ public class Menu {
 
         int index = Preferences.loadPrefInt(featName, featNum);
         if (index > 0) { //Preventing it to get an index less than 1. below 1 = null = crash
-            textView.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + lists.get(index - 1),
-                    Html.FROM_HTML_MODE_LEGACY));
+            textView.setText(Html.fromHtml(featName + ": <font color='" + NumberTxtColor + "'>" + lists.get(index - 1)));
             ((RadioButton) radioGroup.getChildAt(index)).setChecked(true);
         }
         linLayout.addView(radioGroup);
     }
 
+    @SuppressLint("SetTextI18n")
     private void Collapse(LinearLayout linLayout, final String text, final boolean expanded) {
         LinearLayout.LayoutParams layoutParamsLL = new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
         layoutParamsLL.setMargins(0, 5, 0, 0);
@@ -947,6 +1002,7 @@ public class Menu {
         mCollapse = collapseSub;
 
         final TextView textView = new TextView(getContext);
+        textView.setBackgroundColor(CategoryBG);
         textView.setText("▽ " + text + " ▽");
         textView.setGravity(Gravity.CENTER);
         textView.setTextColor(TEXT_COLOR_2);
@@ -982,7 +1038,8 @@ public class Menu {
 
     private void Category(LinearLayout linLayout, String text) {
         TextView textView = new TextView(getContext);
-        textView.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
+        textView.setBackgroundColor(CategoryBG);
+        textView.setText(Html.fromHtml(text));
         textView.setGravity(Gravity.CENTER);
         textView.setTextColor(TEXT_COLOR_2);
         textView.setTypeface(null, Typeface.BOLD);
@@ -992,7 +1049,7 @@ public class Menu {
 
     private void TextView(LinearLayout linLayout, String text) {
         TextView textView = new TextView(getContext);
-        textView.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
+        textView.setText(Html.fromHtml(text));
         textView.setTextColor(TEXT_COLOR_2);
         textView.setPadding(10, 5, 10, 5);
         linLayout.addView(textView);
@@ -1003,7 +1060,6 @@ public class Menu {
         wView.loadData(text, "text/html", "utf-8");
         wView.setBackgroundColor(0x00000000); //Transparent
         wView.setPadding(0, 5, 0, 5);
-
         linLayout.addView(wView);
     }
 
@@ -1017,8 +1073,7 @@ public class Menu {
     }
 
     private int dp(int i) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) i,
-                getContext.getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) i, getContext.getResources().getDisplayMetrics());
     }
 
     public void setVisibility(int view) {

@@ -51,8 +51,10 @@ DWORD getAbsoluteAddress(const char *libraryName, DWORD relativeAddr) {
     return (reinterpret_cast<DWORD>(libBase + relativeAddr));
 }
 
-
-jboolean isGameLibLoaded(JNIEnv *env, jobject thiz) {
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_android_support_Menu_IsGameLibLoaded(JNIEnv *env, jobject thiz) {
+    // TODO: implement IsGameLibLoaded()
     return libLoaded;
 }
 

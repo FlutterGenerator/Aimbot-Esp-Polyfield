@@ -15,14 +15,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /*Thread.setDefaultUncaughtExceptionHandler(
+                new Thread.UncaughtExceptionHandler() {
+                    @Override
+                    public void uncaughtException(Thread thread, Throwable e) {
+                        Log.e("AppCrash", "Error just lunched ");
+                    }
+                });*/
 
-		/*Thread.setDefaultUncaughtExceptionHandler(
-		 new Thread.UncaughtExceptionHandler() {
-		 @Override
-		 public void uncaughtException(Thread thread, Throwable e) {
-		 Log.e("AppCrash", "Error just lunched ");
-		 }
-		 });*/
 
         //To launch game activity
         if (!hasLaunched) {
@@ -30,8 +30,7 @@ public class MainActivity extends Activity {
                 //Start service
                 hasLaunched = true;
                 //Launch mod menu.
-                MainActivity.this
-                        .startActivity(new Intent(MainActivity.this, Class.forName(MainActivity.this.GameActivity)));
+                MainActivity.this.startActivity(new Intent(MainActivity.this, Class.forName(MainActivity.this.GameActivity)));
                 Main.Start(this);
                 return;
             } catch (ClassNotFoundException e) {
@@ -42,7 +41,7 @@ public class MainActivity extends Activity {
         }
 
         //Launch mod menu.
-        Main.StartWithoutPermission(this);
-        //Main.Start(this);
+       // Main.StartWithoutPermission(this);
+        Main.Start(this);
     }
 }

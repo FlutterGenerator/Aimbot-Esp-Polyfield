@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    //noinspection GradleCompatible
     compileSdkVersion 36
     namespace "com.android.support"
 
@@ -11,10 +12,10 @@ android {
         minSdkVersion 24
         targetSdkVersion 36
         versionCode 1
-        versionName "2.8"
+        versionName "3.2"
 
         ndk {
-            abiFilters 'armeabi-v7a'
+            abiFilters 'armeabi-v7a', 'x86'
         }
         signingConfig = signingConfigs.debug
     }
@@ -22,15 +23,13 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile(
-                'proguard-android-optimize.txt'
-            ), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     externalNativeBuild {

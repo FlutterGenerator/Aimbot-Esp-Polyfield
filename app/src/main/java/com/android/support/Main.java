@@ -5,7 +5,10 @@ import android.content.Context;
 
 public class Main {
 
+    //Load lib
     static {
+        // When you change the lib name, change also on Android.mk file
+        // Both must have same name
         System.loadLibrary("DarkTeam");
     }
 

@@ -74,12 +74,17 @@ public class Preferences {
     }
 
     private Preferences(Context context) {
-        sharedPreferences = context.getApplicationContext()
-                .getSharedPreferences(context.getPackageName() + "_preferences", Context.MODE_PRIVATE);
+        sharedPreferences = context.getApplicationContext().getSharedPreferences(
+                context.getPackageName() + "_preferences",
+                Context.MODE_PRIVATE
+        );
     }
 
     private Preferences(Context context, String preferencesName) {
-        sharedPreferences = context.getApplicationContext().getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
+        sharedPreferences = context.getApplicationContext().getSharedPreferences(
+                preferencesName,
+                Context.MODE_PRIVATE
+        );
     }
 
     /**
@@ -123,7 +128,8 @@ public class Preferences {
      * @param forceInstantiation
      * @return Returns a 'Preferences' instance
      */
-    public static Preferences with(Context context, String preferencesName, boolean forceInstantiation) {
+    public static Preferences with(Context context, String preferencesName,
+                                   boolean forceInstantiation) {
         if (forceInstantiation) {
             prefsInstance = new Preferences(context, preferencesName);
         }
@@ -186,6 +192,7 @@ public class Preferences {
     public int readInt(String what) {
         return sharedPreferences.getInt(what, DEFAULT_INT_VALUE);
     }
+
 
     /**
      * @param what
@@ -333,8 +340,8 @@ public class Preferences {
      * @return Returns the stored value of 'what'
      */
     public boolean readBoolean(String what, boolean defaultBoolean) {
-		/*if (defaultBoolean == true && !sharedPreferences.contains(what))
-		 writeBoolean(what, true);*/
+        /*if (defaultBoolean == true && !sharedPreferences.contains(what))
+            writeBoolean(what, true);*/
         return sharedPreferences.getBoolean(what, defaultBoolean);
     }
 
@@ -344,8 +351,8 @@ public class Preferences {
      * @return Returns the stored value of 'what'
      */
     public boolean readBoolean(int what, boolean defaultBoolean) {
-		/*if (defaultBoolean == true && !sharedPreferences.contains(String.valueOf(what)))
-		 writeBoolean(what, true);*/
+        /*if (defaultBoolean == true && !sharedPreferences.contains(String.valueOf(what)))
+            writeBoolean(what, true);*/
         try {
             return sharedPreferences.getBoolean(String.valueOf(what), defaultBoolean);
         } catch (java.lang.ClassCastException ex) {

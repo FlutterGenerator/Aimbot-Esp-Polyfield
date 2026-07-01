@@ -1,4 +1,10 @@
+#ifndef HENZRY_CHAMS
+#define HENZRY_CHAMS
+
 #include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
+#include <GLES3/gl32.h>
 #include <dlfcn.h>
 #include <Substrate/SubstrateHook.h>
 #include <Substrate/CydiaSubstrate.h>
@@ -6,21 +12,24 @@
 static void *handle;
 static const char *shaderName;
 static bool enableWallhack;
+static bool enableWallhackS;
 static bool enableWallhackW;
 static bool enableWallhackG;
 static bool enableWallhackO;
 static bool enableRainbow;
 static bool enableRainbow1;
-static float r = 0;
-static float g = 0;
-static float b = 0;
-static int w = 0;
-static int a = 0;
+static float r = 255.0f;
+static float g = 0.0f;
+static float b = 0.0f;
+static int w = 1;
+static int a = 255;
 
-float red = 0;
-float gren = 0;
-float blue = 0;
-float mi = 0;
+
+float red = 255.0f;
+float gren = 0.0f;
+float blue = 0.0f;
+float mi = 0.0f;
+
 
 void setShader(const char *s) {
     shaderName = s;
@@ -32,6 +41,10 @@ const char *getShader() {
 
 void SetWallhack(bool enable) {
     enableWallhack = enable;
+}
+
+void SetWallhackS(bool enable) {
+    enableWallhackS = enable;
 }
 
 void SetWallhackW(bool enable) {
@@ -46,6 +59,7 @@ void SetWallhackO(bool enable) {
     enableWallhackO = enable;
 }
 
+
 void SetRainbow(bool enable) {
     enableRainbow = enable;
 }
@@ -53,6 +67,7 @@ void SetRainbow(bool enable) {
 void SetRainbow1(bool enable) {
     enableRainbow1 = enable;
 }
+
 
 void SetR(int set) {
     r = set;
@@ -70,8 +85,13 @@ void SetW(int set) {
     w = set;
 }
 
+
 bool getWallhackEnabled() {
     return enableWallhack;
+}
+
+bool getShadingEnabled() {
+    return enableWallhackS;
 }
 
 bool getWireframeEnabled() {
@@ -97,7 +117,6 @@ bool getRainbow1Enabled() {
 int (*old_glGetUniformLocation)(GLuint, const GLchar *);
 
 GLint new_glGetUniformLocation(GLuint program, const GLchar *name) {
-
     return old_glGetUniformLocation(program, name);
 }
 
@@ -142,13 +161,27 @@ void new_glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *ind
             glBlendFunc(GL_CONSTANT_ALPHA, GL_CONSTANT_COLOR);
         }
 
+        if (getShadingEnabled()) {
+            glDepthRangef(1, 0.5);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_COLOR, GL_CONSTANT_COLOR);
+            glBlendEquation(GL_FUNC_ADD);
+            glBlendColor(GLfloat(r / 255), GLfloat(g / 255), GLfloat(b / 255), 1);
+            glDepthFunc(GL_ALWAYS);
+            old_glDrawElements(GL_TRIANGLES, count, type, indices);
+            glColorMask(r, g, b, 255);
+            glBlendFunc(GL_DST_COLOR, GL_ONE);
+            glDepthFunc(GL_LESS);
+            glBlendColor(0.0, 0.0, 0.0, 0.0);
+        }
+
         if (getGlowEnabled()) {
             glEnable(GL_BLEND);
             glBlendColor(GLfloat(r / 255), GLfloat(g / 255), GLfloat(b / 255), 1);
             glColorMask(1, 1, 1, 1);
             glEnable(GL_BLEND);
             glBlendFuncSeparate(GL_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE, GL_ZERO);
-            glLineWidth(15);
+            glLineWidth(w);
 
             glDepthRangef(0.5, 1);
             old_glDrawElements(GL_LINES, count, type, indices);
@@ -159,7 +192,7 @@ void new_glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *ind
 
         if (getOutlineEnabled()) {
             glDepthRangef(1, 0.5);
-            glLineWidth(20.0f);
+            glLineWidth(w);
             glEnable(GL_BLEND);
             glColorMask(1, 1, 1, 1);
             glBlendFuncSeparate(GL_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE, GL_ZERO);
@@ -170,7 +203,7 @@ void new_glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *ind
         }
 
         if (getRainbowEnabled()) {
-            if (getRainbow1Enabled) {
+            if (getRainbow1Enabled()) {
                 if (red == 255) {
                     if (blue == 0) {
                         if (gren == 255) {}
@@ -261,3 +294,5 @@ void Wallhack() {
     }
 }
 
+
+#endif

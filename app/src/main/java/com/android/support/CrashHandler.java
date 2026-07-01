@@ -20,8 +20,7 @@ import java.util.Date;
 
 public final class CrashHandler {
 
-    public static final UncaughtExceptionHandler DEFAULT_UNCAUGHT_EXCEPTION_HANDLER = Thread
-            .getDefaultUncaughtExceptionHandler();
+    public static final UncaughtExceptionHandler DEFAULT_UNCAUGHT_EXCEPTION_HANDLER = Thread.getDefaultUncaughtExceptionHandler();
 
     public static void init(final Context app, final boolean overlayRequired) {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -94,8 +93,7 @@ public final class CrashHandler {
                 }
 
                 Toast.makeText(app, "Game has crashed unexpectedly", Toast.LENGTH_LONG).show();
-                Toast.makeText(app, "Log saved to: " + String.valueOf(crashFile).replace("/storage/emulated/0/", ""),
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(app, "Log saved to: " + String.valueOf(crashFile).replace("/storage/emulated/0/", ""), Toast.LENGTH_LONG).show();
 
                 Log.e("AppCrash", "Done");
 
@@ -118,3 +116,4 @@ public final class CrashHandler {
         });
     }
 }
+
